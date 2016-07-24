@@ -1,0 +1,144 @@
+# vim: set ft=ruby
+<%
+  def camel_case(name)
+    name.split('_').map(&:capitalize).join
+  end
+
+  def repeat1(name)
+    <<-EOD
+    #{name}s : 
+        #{name}
+        { [val[0]] }
+      | #{name}s #{name}
+        { val[0].push(val[1]) }
+    EOD
+  end
+
+  def repeat0(name)
+    <<-EOD
+    opt_#{name}s :
+        /* NONE */ 
+      { [] }
+      | #{name}s
+      { val[0] }
+
+    #{repeat1(name)}
+    EOD
+  end
+%>
+class FjR::Parser
+  options no_result_var
+  token TYPE_NAME IDENT
+rule
+    program :
+      opt_class_defs expression
+      { Ast::Program.new(val[0], val[1]) }
+
+    class_def :
+      'class' TYPE_NAME 'extends' TYPE_NAME '{'
+         definitions
+      '}'
+      { Ast::ClassDef.new(val[1], val[3], val[5]) }
+    <%= repeat0 'class_def' %>
+
+    definition : 
+      ctor_def | field_def | method_def
+    <%= repeat1 'definition' %>
+
+    ctor_def :
+      TYPE_NAME '(' opt_params ')' '{'
+        'super' '(' opt_params ')' ';'
+        opt_field_assigns
+      '}'
+      { Ast::CtorDef.new(val[0], val[2], val[6], val[9]) }
+    
+    field_assign :
+      'this' '.' IDENT '=' IDENT ';'
+      { Ast::FieldAssign(val[2], val[4]) }
+    <%= repeat0 'field_assign' %>
+
+    field_def :
+      TYPE_NAME IDENT
+      { Ast::FieldDef.new(val[0], val[1]) }
+    <%= repeat0 'field_def' %>
+
+    method_def :
+      TYPE_NAME IDENT '(' opt_params ')' '{'
+        'return' expression ';'
+      '}'
+      { Ast::MethodDef.new(val[0], val[1], val[3], val[7]) }
+    <%= repeat0 'method_def' %>
+
+    param : 
+      TYPE_NAME IDENT
+      { Ast::Param.new(val[0], val[1]) }
+    <%= repeat0 'param' %>
+
+    expression :
+        varref
+      | field_ref
+      | method_call
+      | new_obj
+      | '(' TYPE_NAME ')' expression
+        { Ast::CastExpr.new(val[1], val[3]) }
+
+    varref : 
+      IDENT
+      { Ast::VarRef.new(val[0]) }
+
+    field_ref :
+      expression '.' IDENT
+      { Ast::FieldRef.new(val[0], val[2]) }
+
+    method_call :
+      expression '.' IDENT '(' opt_args ')'
+      { Ast::MethodCall.new(val[0], val[2], val[4]) }
+
+    new_obj : 
+      'new' TYPE_NAME '(' opt_args ')'
+      { Ast::NewObj.new(val[1], val[3]) }
+
+    arg : expression
+    <%= repeat0 'arg' %>
+end
+
+---- header
+require 'strscan'
+
+---- inner
+KEYWORDS = /class|extends|super|return|new/
+
+SYMBOLS = /[(){},.=;]/
+
+def parse(str)
+  @yydebug = true
+
+  @q = []
+  s = StringScanner.new(str)
+  until s.empty?
+    case
+    when s.scan(/\s+/)
+      # skip whitespace
+    when s.scan(%r{//.*\n})
+      # skip comment
+    when m = s.scan(SYMBOLS)
+      @q << [m, nil]
+    when m = s.scan(/\d+(\.\d+)?/)
+      @q << [:NUMBER, m.to_f]
+    when m = s.scan(KEYWORDS)
+      @q << [m, m.to_sym]
+    when m = s.scan(/[A-Z]\w*/)
+      @q << [:TYPE_NAME, m]
+    when m = s.scan(/\w+/)
+      @q << [:IDENT, m]
+    else
+      raise "no match: #{s.inspect}"
+    end
+  end
+
+  do_parse
+end
+
+def next_token
+  @q.shift
+end
