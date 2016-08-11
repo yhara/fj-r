@@ -1,77 +1,55 @@
 module FjR
   class Ast
-    class Program < Ast
-      def initialize(class_defs, expr)
-        @class_defs, @expr = class_defs, expr
-      end
+    class Node
+      extend Props
     end
 
-    class ClassDef < Ast
-      def initialize(name, parent_name, defs)
-        @name, @parent_name, @defs = name, parent_name, defs
-      end
+    class Program < Node
+      props :class_defs, :expr
     end
 
-    class CtorDef < Ast
-      def initialize(name, params, super_params, field_assigns)
-        @name, @params, @super_params, @field_assigns =
-          name, params, super_params, field_assigns
-      end
+    class ClassDef < Node
+      props :name, :parent_name, :member_defs
     end
 
-    class FieldAssign < Ast
-      def initialize(this_name, param_name)
-        @this_name, @param_name = this_name, param_name
-      end
+    class CtorDef < Node
+      props :name, :params, :super_params, :field_assigns
     end
 
-    class FieldDef < Ast
-      def initialize(type_name, field_name)
-        @type_name, @field_name = type_name, field_name
-      end
+    class FieldAssign < Node
+      props :this_name, :param_name
     end
 
-    class MethodDef < Ast
-      def initialize(ret_type_name, method_name, params, body_expr) 
-        @ret_type_name, @method_name, @params, @body_expr =
-          ret_type_name, method_name, params, body_expr
-      end
+    class FieldDef < Node
+      props :type_name, :field_name
     end
 
-    class Param < Ast
-      def initialize(type_name, name)
-        @type_name, @name = type_name, name
-      end
+    class MethodDef < Node
+      props :ret_type_name, :method_name, :params, :body_expr
     end
 
-    class CastExpr < Ast
-      def initialize(type_name, expr)
-        @type_name, @expr = name, expr
-      end
+    class Param < Node
+      props :type_name, :name
     end
 
-    class VarRef < Ast
-      def initialize(name)
-        @name = name
-      end
+    class CastExpr < Node
+      props :type_name, :expr
     end
 
-    class FieldRef < Ast
-      def initialize(expr, name)
-        @expr, @name = expr, name
-      end
+    class VarRef < Node
+      props :name
     end
 
-    class MethodCall < Ast
-      def initialize(expr, name, args)
-        @expr, @name, @args = expr, name, args
-      end
+    class FieldRef < Node
+      props :expr, :name
     end
 
-    class NewObj < Ast
-      def initialize(type_name, args)
-        @type_name, @args = type_name, args
-      end
+    class MethodCall < Node
+      props :expr, :name, :args
+    end
+
+    class NewObj < Node
+      props :type_name, :args
     end
   end
 end
