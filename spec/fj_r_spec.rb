@@ -5,12 +5,12 @@ describe FjR do
   it "temp" do
     pp FjR::Parser.new.parse("
       class T extends Object {
-        Y() { super(); }
-        Abject foo(Bbject x) {
+        T() { super(); }
+        Object foo(Object x) {
           return x;
         }
       }
-      new Z().foo(new Cbject())
+      new T().foo(new Object())
     ")
   end
 end
