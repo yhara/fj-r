@@ -61,7 +61,7 @@ module FjR
       end
 
       if ctor.arity != fields.length
-        raise ArityError, format("ctor of class %s must receive %d arguments",
+        raise ArityError, format("ctor of class %s must receive %d argument(s)",
                                  class_def.name, fields.length)
       end
 
