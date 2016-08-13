@@ -5,7 +5,7 @@ file 'lib/fj-r/parser.ry' => 'lib/fj-r/parser.ry.erb' do
 end
 
 file 'lib/fj-r/parser.rb' => 'lib/fj-r/parser.ry' do
-  # hint: add -g to debug parser
+  # hint: add -g to debug parser (run `rake -B` for force rebuild)
   sh "racc -o lib/fj-r/parser.rb lib/fj-r/parser.ry"
 end
 
