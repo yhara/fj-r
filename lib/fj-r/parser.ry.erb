@@ -54,7 +54,7 @@ rule
     
     field_assign :
       'this' '.' IDENT '=' IDENT ';'
-      { Ast::FieldAssign(val[2], val[4]) }
+      { Ast::FieldAssign.new(val[2], val[4]) }
     <%= repeat0 'field_assign' %>
 
     field_def :
@@ -110,7 +110,7 @@ end
 require 'strscan'
 
 ---- inner
-KEYWORDS = /class|extends|super|return|new/
+KEYWORDS = /class|extends|super|return|new|this/
 
 SYMBOLS = /[(){},.=;]/
 
