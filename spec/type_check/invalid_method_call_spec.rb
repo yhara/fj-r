@@ -3,13 +3,13 @@ require 'spec_helper'
 TC = FjR::TypeChecker
 
 describe FjR::TypeChecker do
-  context "invalid method call" do
-    def check(str)
-      ast = FjR::Parser.new.parse(str)
-      program = FjR::Program.new(ast)
-      FjR::TypeChecker.new(program).check
-    end
+  def check(str)
+    ast = FjR::Parser.new.parse(str)
+    program = FjR::Program.new(ast)
+    FjR::TypeChecker.new(program).check
+  end
 
+  context "invalid method call" do
     it "too many arguments" do
       expect {
         check <<-EOD
