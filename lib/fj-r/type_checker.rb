@@ -37,21 +37,21 @@ module FjR
       when Ast::VarRef
         e.type = env.fetch(e.name)
       when Ast::FieldRef
-        type_expr!(e.expr)
+        type_expr!(e.expr, env)
         e.type = fclass(e.expr.type).field(e.name)
       when Ast::MethodCall
-        type_expr!(e.expr)
+        type_expr!(e.expr, env)
         method = fclass(e.expr.type).method(e.name)
         if e.args.length != method.arity
           raise ArityError, format("%p takes %d arguments but gave %d",
                                    method, method.arity, e.args.length)
         end
         arg_types = e.args.map{|arg|
-          type_expr!(arg)
+          type_expr!(arg, env)
           arg.type
         }
         method.params.zip(e.args) do |param, arg_expr|
-          type_expr!(arg_expr)
+          type_expr!(arg_expr, env)
           if param.type_name != arg_expr.type
             raise ArgTypeError, format("%s expected but got %s (%p)",
                                        param.type_name, arg_expr.type, arg_expr)
@@ -66,7 +66,7 @@ module FjR
                                    fklass.name, ctor.arity, e.args.length)
         end
         ctor.params.zip(e.args) do |param, arg_expr|
-          type_expr!(arg_expr)
+          type_expr!(arg_expr, env)
           if param.type_name != arg_expr.type
             raise ArgTypeError, format("%s expected but got %s (%p)",
                                        param.type_name, arg_expr.type, arg_expr)

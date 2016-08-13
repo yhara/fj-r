@@ -32,9 +32,9 @@ describe FjR::TypeChecker do
             A my_a;
             B(A a){ super(); this.my_a = a; }
           }
-          new Object(new Object())
+          new B(new Object());
         EOD
-      }.to raise_error(TC::ArityError)
+      }.to raise_error(TC::ArgTypeError)
     end
   end
 end
