@@ -4,6 +4,7 @@ module FjR
     class ArityError < Error; end
     class ArgTypeError < Error; end
     class NameError < Error; end
+    class ReturnTypeError < Error; end
 
     # For test
     def self.check(str)
@@ -19,15 +20,25 @@ module FjR
     end
 
     def check
-      @program.fclasses.each(&method(:check_fclass))
+      @program.fclasses.each{|k, v| check_fclass(v)}
       type_expr!(@program.expr, {})
     end
 
     private
 
     def check_fclass(fclass)
-      # Do we need to collect types of the fields and methods?
-      #TODO
+      fclass.fmethods.each do |_, meth|
+        env = meth.params.map{|param|
+          [param.name, param.type_name]
+        }.to_h
+        type_expr!(meth.body_expr, env)
+
+        if meth.body_expr.type != meth.ret_type
+          raise ReturnTypeError, format(
+            "%s#%s is declared to return %s but returns %s",
+            fclass.name, meth.name, meth.ret_type, meth.body_expr.type)
+        end
+      end
     end
 
     def type_expr!(e, env)

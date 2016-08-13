@@ -15,6 +15,20 @@ describe FjR::TypeChecker do
     end
   end
 
+  context "method definition" do
+    it "return type mismatch" do
+      expect {
+        TC.check <<-EOD
+          class A extends Object {
+            A(){ super(); }
+            Object foo(){ return new A(); }
+          }
+          new A();
+        EOD
+      }.to raise_error(TC::ReturnTypeError)
+    end
+  end
+
   context "invalid ctor call" do
     it "too many arguments" do
       expect {

@@ -21,7 +21,8 @@ module FjR
       end
       @expr = ast.expr
     end
-    attr_reader :fclasses, :expr
+    attr_reader :fclasses   # {String => FClass}
+    attr_reader :expr       # Ast::Node
 
     private
 
@@ -60,7 +61,9 @@ module FjR
         end
       end
 
-      if ctor.arity != fields.length
+      if ctor.nil?
+        raise SyntaxError, format("missing ctor of class %s", class_def.name)
+      elsif ctor.arity != fields.length
         raise ArityError, format("ctor of class %s must receive %d argument(s)",
                                  class_def.name, fields.length)
       end
@@ -99,8 +102,8 @@ module FjR
       props :name, # String
             :parent, # FClass,
             :ctor,
-            :fields, # {String => FField},
-            :methods # {String => FMethod}
+            :ffields, # {String => FField},
+            :fmethods # {String => FMethod}
 
       def init
         raise "ctor is nil" if @ctor.nil?
