@@ -34,22 +34,27 @@ module FjR
 
     class CastExpr < Node
       props :type_name, :expr
+      attr_accessor :type
     end
 
     class VarRef < Node
       props :name
+      attr_accessor :type
     end
 
     class FieldRef < Node
       props :expr, :name
+      attr_accessor :type
     end
 
     class MethodCall < Node
       props :expr, :name, :args
+      attr_accessor :type
     end
 
     class NewObj < Node
       props :type_name, :args
+      attr_accessor :type
     end
   end
 end
