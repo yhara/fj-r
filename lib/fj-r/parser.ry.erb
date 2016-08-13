@@ -31,7 +31,7 @@ class FjR::Parser
   token TYPE_NAME IDENT
 rule
     program :
-      opt_class_defs expression
+      opt_class_defs expression opt_semicolon
       { Ast::Program.new(val[0], val[1]) }
 
     class_def :
@@ -100,6 +100,10 @@ rule
 
     arg : expression
     <%= repeat0 'arg' %>
+
+    opt_semicolon :
+        /* none */
+      | ';'
 end
 
 ---- header
