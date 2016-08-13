@@ -58,7 +58,7 @@ rule
     <%= repeat0 'field_assign' %>
 
     field_def :
-      TYPE_NAME IDENT
+      TYPE_NAME IDENT ';'
       { Ast::FieldDef.new(val[0], val[1]) }
     <%= repeat0 'field_def' %>
 
