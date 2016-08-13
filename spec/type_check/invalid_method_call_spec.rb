@@ -9,7 +9,7 @@ describe FjR::TypeChecker do
     FjR::TypeChecker.new(program).check
   end
 
-  context "invalid method call" do
+  context "invalid ctor call" do
     it "too many arguments" do
       expect {
         check <<-EOD
