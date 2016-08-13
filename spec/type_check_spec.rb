@@ -1,6 +1,19 @@
 require 'spec_helper'
 
 describe FjR::TypeChecker do
+  context "class definition" do
+    it "cyclic inheritance" do
+      expect {
+        TC.check <<-EOD
+          class A extends B { A(){ super(); } }
+          class B extends C { B(){ super(); } }
+          class C extends A { C(){ super(); } }
+          new A();
+        EOD
+      }.to raise_error(TC::CyclicInheritance)
+    end
+  end
+
   context "ctor definition" do
     it "ctor should recieve args for all fields" do
       expect {

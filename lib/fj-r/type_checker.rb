@@ -1,3 +1,5 @@
+require 'tsort'
+
 module FjR
   class TypeChecker
     class Error < StandardError; end
@@ -5,6 +7,7 @@ module FjR
     class ArgTypeError < Error; end
     class NameError < Error; end
     class ReturnTypeError < Error; end
+    class CyclicInheritance < Error; end
 
     # For test
     def self.check(str)
@@ -20,11 +23,39 @@ module FjR
     end
 
     def check
+      check_superclasses!(@program.fclasses)
       @program.fclasses.each{|k, v| check_fclass(v)}
       type_expr!(@program.expr, {})
     end
 
     private
+
+    class FClassesCyclicChecker
+      include TSort
+
+      def initialize(fclasses)
+        @fclasses = fclasses
+      end
+
+      def tsort_each_node(&block)
+        @fclasses.each_value(&block)
+      end
+
+      def tsort_each_child(fclass, &block)
+        return if fclass.parent == :noparent # Object
+        if (parent = @fclasses[fclass.parent])
+          block.call(parent)
+        else
+          raise NameError, format("unknown class %s", fclass.parent)
+        end
+      end
+    end
+
+    def check_superclasses!(fclasses)
+      FClassesCyclicChecker.new(fclasses).tsort
+    rescue TSort::Cyclic
+      raise CyclicInheritance
+    end
 
     def check_fclass(fclass)
       fclass.fmethods.each do |_, meth|

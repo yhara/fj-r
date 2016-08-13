@@ -13,7 +13,7 @@ module FjR
 
       obj_ctor = FCtor.new("Object", [], [], [])
       @fclasses = {
-        "Object" => FClass.new("Object", nil, obj_ctor, {}, {})
+        "Object" => FClass.new("Object", :noparent, obj_ctor, {}, {})
       }
 
       ast.class_defs.each do |x|
@@ -28,9 +28,6 @@ module FjR
 
     def parse_class_def(class_def)
       raise SyntaxError.misplaced(class_def) unless class_def.is_a?(Ast::ClassDef)
-
-      # TODO: is it legal to inherit a class defined below?
-      parent = @fclasses.fetch(class_def.parent_name)
 
       ctor = nil
       fields = {}
@@ -68,7 +65,8 @@ module FjR
                                  class_def.name, fields.length)
       end
 
-      return FClass.new(class_def.name, parent, ctor, fields, methods)
+      return FClass.new(class_def.name, class_def.parent_name,
+                        ctor, fields, methods)
     end
 
     def parse_member_def(member_def)
@@ -100,7 +98,7 @@ module FjR
     class FClass
       extend Props
       props :name, # String
-            :parent, # FClass,
+            :parent, # String or :noparent
             :ctor,
             :ffields, # {String => FField},
             :fmethods # {String => FMethod}
