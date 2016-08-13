@@ -5,7 +5,8 @@ file 'lib/fj-r/parser.ry' => 'lib/fj-r/parser.ry.erb' do
 end
 
 file 'lib/fj-r/parser.rb' => 'lib/fj-r/parser.ry' do
-  sh "racc -g -o lib/fj-r/parser.rb lib/fj-r/parser.ry"
+  # hint: add -g to debug parser
+  sh "racc -o lib/fj-r/parser.rb lib/fj-r/parser.ry"
 end
 
 task :default => 'lib/fj-r/parser.rb' do
