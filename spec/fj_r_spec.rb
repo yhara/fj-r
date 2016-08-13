@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe FjR do
-  it "temp" do
+  it "should parse source code" do
     ast = FjR::Parser.new.parse("
       class T extends Object {
         T() { super(); }
@@ -11,6 +11,6 @@ describe FjR do
       }
       new T().foo(new Object())
     ")
-    pp FjR::Program.new(ast)
+    FjR::Program.new(ast)
   end
 end
