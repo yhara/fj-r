@@ -5,6 +5,13 @@ module FjR
     class ArgTypeError < Error; end
     class NameError < Error; end
 
+    # For test
+    def self.check(str)
+      ast = FjR::Parser.new.parse(str)
+      program = FjR::Program.new(ast)
+      FjR::TypeChecker.new(program).check
+    end
+
     # @param program [FjR::Program]
     def initialize(program)
       @program = program
