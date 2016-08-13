@@ -26,7 +26,7 @@ module FjR
     private
 
     def check_fclass(fclass)
-      #最初に、各フィールドとメソッドの型を整理しないといけない？
+      # Do we need to collect types of the fields and methods?
       #TODO
     end
 
