@@ -1,6 +1,7 @@
 module FjR
   class Program
     class Error < StandardError; end
+    class ArityError < Error; end
     class SyntaxError < Error
       def self.misplaced(node)
         new("misplaced #{node}")
@@ -57,6 +58,11 @@ module FjR
         else
           raise "must not happen"
         end
+      end
+
+      if ctor.arity != fields.length
+        raise ArityError, format("ctor of class %s must receive %d arguments",
+                                 class_def.name, fields.length)
       end
 
       return FClass.new(class_def.name, parent, ctor, fields, methods)
