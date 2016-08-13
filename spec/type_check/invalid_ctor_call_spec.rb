@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-TC = FjR::TypeChecker
-
 describe FjR::TypeChecker do
   def check(str)
     ast = FjR::Parser.new.parse(str)
