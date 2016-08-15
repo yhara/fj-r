@@ -1,6 +1,14 @@
 require 'spec_helper'
 
 describe FjR::TypeChecker do
+  # TODO: instance variable name must not be the same as superclass's
+  # TODO: overriding method of superclass is allowed
+  #   - but must have the same type
+  # TODO: type of this
+  # TODO: mutual recursion over two classes
+  # TODO: accessing inherited field
+  # TODO: accessing inherited method
+
   context "class definition" do
     it "cyclic inheritance" do
       expect {
@@ -12,6 +20,20 @@ describe FjR::TypeChecker do
         EOD
       }.to raise_error(TC::CyclicInheritance)
     end
+  end
+
+  context "field definition" do
+    #it "may be typed self" do
+    #  expect {
+    #    TC.check <<-EOD
+    #      class A extends Object {
+    #        A a;
+    #        A(A a_){ super(); this.a = a_; }
+    #      }
+    #      ?? TODO: how could I instantiate A?
+    #    EOD
+    #  }.to raise_error(TODO)
+    #end
   end
 
   context "ctor definition" do
@@ -29,16 +51,27 @@ describe FjR::TypeChecker do
   end
 
   context "method definition" do
-    it "return type mismatch" do
+    it "must return declared type" do
       expect {
         TC.check <<-EOD
           class A extends Object {
             A(){ super(); }
-            Object foo(){ return new A(); }
+            Object bad_method(){ return new A(); }
           }
           new A();
         EOD
       }.to raise_error(TC::ReturnTypeError)
+    end
+
+    it "may return self type" do
+      result_type = TC.check <<-EOD
+        class A extends Object {
+          A(){ super(); }
+          A ok_method(){ return new A(); }
+        }
+        new A().ok_method();
+      EOD
+      expect(result_type).to eq("A")
     end
   end
 

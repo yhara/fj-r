@@ -2,6 +2,7 @@ module FjR
   class Program
     class Error < StandardError; end
     class ArityError < Error; end
+    class NameError < Error; end
     class SyntaxError < Error
       def self.misplaced(node)
         new("misplaced #{node}")
@@ -108,11 +109,21 @@ module FjR
       end
 
       def field(name)
-        @fields.fetch(name)
+        if (f = @ffields[name])
+          return f
+        else
+          raise NameError, format("unknown field %s of class %s",
+                                  name, @name)
+        end
       end
 
       def method(name)
-        @methods.fetch(name)
+        if (m = @fmethods[name])
+          return m
+        else
+          raise NameError, format("unknown method %s of class %s",
+                                  name, @name)
+        end
       end
     end
 

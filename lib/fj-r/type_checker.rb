@@ -13,7 +13,7 @@ module FjR
     def self.check(str)
       ast = FjR::Parser.new.parse(str)
       program = FjR::Program.new(ast)
-      FjR::TypeChecker.new(program).check
+      return FjR::TypeChecker.new(program).check
     end
 
     # @param program [FjR::Program]
@@ -22,10 +22,13 @@ module FjR
       @fclasses = @program.fclasses
     end
 
+    # Set types to each expressions
+    # @return [String] type of the result of the program
     def check
       check_superclasses!(@program.fclasses)
       @program.fclasses.each{|k, v| check_fclass(v)}
       type_expr!(@program.expr, {})
+      return @program.expr.type
     end
 
     private
