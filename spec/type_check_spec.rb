@@ -89,8 +89,8 @@ describe FjR::TypeChecker do
     end
   end
 
-  context "invalid ctor call" do
-    it "too many arguments" do
+  context "ctor call" do
+    it "must pass expected number of arguments" do
       expect {
         TC.check <<-EOD
           new Object(new Object())
@@ -98,7 +98,7 @@ describe FjR::TypeChecker do
       }.to raise_error(TC::ArityError)
     end
 
-    it "argument type mismatch" do
+    it "must give arguments of expected type" do
       expect {
         TC.check <<-EOD
           class A extends Object { A(){ super(); } }
