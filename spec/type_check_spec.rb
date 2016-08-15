@@ -5,7 +5,6 @@ describe FjR::TypeChecker do
   # TODO: overriding method of superclass is allowed
   #   - but must have the same type
   # TODO: type of this
-  # TODO: mutual recursion over two classes
   # TODO: accessing inherited field
   # TODO: accessing inherited method
 
@@ -70,6 +69,21 @@ describe FjR::TypeChecker do
           A ok_method(){ return new A(); }
         }
         new A().ok_method();
+      EOD
+      expect(result_type).to eq("A")
+    end
+
+    it "may mutually recurse over classes" do
+      result_type = TC.check <<-EOD
+        class A extends Object {
+          A(){ super(); }
+          A foo(){ return new B().bar(); }
+        }
+        class B extends Object {
+          B(){ super(); }
+          A bar(){ return new A().foo(); }
+        }
+        new A().foo();
       EOD
       expect(result_type).to eq("A")
     end
