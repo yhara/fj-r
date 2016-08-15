@@ -25,7 +25,7 @@ module FjR
     # Set types to each expressions
     # @return [String] type of the result of the program
     def check
-      check_superclasses!(@program.fclasses)
+      set_superclasses!(@program.fclasses)
       @program.fclasses.each{|k, v| check_fclass(v)}
       type_expr!(@program.expr, {})
       return @program.expr.type
@@ -45,19 +45,29 @@ module FjR
       end
 
       def tsort_each_child(fclass, &block)
-        return if fclass.parent == :noparent # Object
-        if (parent = @fclasses[fclass.parent])
-          block.call(parent)
+        return if fclass.parent_name == :noparent # Object
+        if (c = @fclasses[fclass.parent_name])
+          block.call(c)
         else
-          raise NameError, format("unknown class %s", fclass.parent)
+          raise TypeChecker::NameError, format("unknown class %s",
+                                               fclass.parent_name)
         end
       end
     end
 
-    def check_superclasses!(fclasses)
-      FClassesCyclicChecker.new(fclasses).tsort
-    rescue TSort::Cyclic
-      raise CyclicInheritance
+    def set_superclasses!(fclasses)
+      begin
+        FClassesCyclicChecker.new(fclasses).tsort
+      rescue TSort::Cyclic
+        raise CyclicInheritance
+      end
+      fclasses.each_value do |fclass|
+        if fclass.parent_name == :noparent
+          fclass.parent = :noparent  #Object
+        else
+          fclass.parent = fclasses.fetch(fclass.parent_name)
+        end
+      end
     end
 
     def check_fclass(fclass)
@@ -86,7 +96,7 @@ module FjR
         e.type = fclass(e.expr.type).field(e.name)
       when Ast::MethodCall
         type_expr!(e.expr, env)
-        method = fclass(e.expr.type).method(e.name)
+        method = fclass(e.expr.type).find_method(e.name)
         if e.args.length != method.arity
           raise ArityError, format("%p takes %d arguments but gave %d",
                                    method, method.arity, e.args.length)

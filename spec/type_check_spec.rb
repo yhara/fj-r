@@ -2,11 +2,8 @@ require 'spec_helper'
 
 describe FjR::TypeChecker do
   # TODO: instance variable name must not be the same as superclass's
-  # TODO: overriding method of superclass is allowed
-  #   - but must have the same type
   # TODO: type of this
   # TODO: accessing inherited field
-  # TODO: accessing inherited method
 
   context "class definition" do
     it "cyclic inheritance" do
@@ -111,4 +108,30 @@ describe FjR::TypeChecker do
       }.to raise_error(TC::ArgTypeError)
     end
   end
+
+  context "method call" do
+    it "may invoke a method defined in the superclass" do
+      result_type = TC.check <<-EOD
+        class A extends Object {
+          A(){ super(); }
+          Object foo(){ return new Object(); }
+        }
+        class B extends A {
+          B(){ super(); }
+        }
+        new B().foo();
+      EOD
+      expect(result_type).to eq("Object")
+    end
+  end
+
+  context "variable reference"
+
+  context "field reference"
+
+  context "casting"
+
+  context "override"
+  # TODO: overriding method of superclass is allowed
+  #   - but must have the same type
 end

@@ -99,10 +99,14 @@ module FjR
     class FClass
       extend Props
       props :name, # String
-            :parent, # String or :noparent
+            :parent_name, # String or :noparent
             :ctor,
             :ffields, # {String => FField},
             :fmethods # {String => FMethod}
+
+      # Will be set by TypeChecker#set_superclasses!
+      # :noparent is set for Object
+      attr_accessor :parent
 
       def init
         raise "ctor is nil" if @ctor.nil?
@@ -117,12 +121,17 @@ module FjR
         end
       end
 
-      def method(name)
+      # returns FMethod defined on this class or its ancestors
+      def find_method(name, start = @name)
         if (m = @fmethods[name])
           return m
         else
-          raise NameError, format("unknown method %s of class %s",
-                                  name, @name)
+          if @parent == :noparent
+            raise NameError, format("unknown method %s of class %s",
+                                    name, start)
+          else
+            return @parent.find_method(name, start)
+          end
         end
       end
     end
