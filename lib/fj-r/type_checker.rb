@@ -71,6 +71,14 @@ module FjR
     end
 
     def check_fclass(fclass)
+      # ctor
+      if fclass.ctor.arity != fclass.n_fields
+        raise ArityError, format(
+          "ctor of class %s must receive %d arg(s) but receives %d",
+          fclass.name, fclass.n_fields, fclass.ctor.arity)
+      end
+
+      # methods
       fclass.fmethods.each do |_, meth|
         env = meth.params.map{|param|
           [param.name, param.type_name]
@@ -93,7 +101,7 @@ module FjR
         e.type = env.fetch(e.name)
       when Ast::FieldRef
         type_expr!(e.expr, env)
-        e.type = fclass(e.expr.type).field(e.name)
+        e.type = fclass(e.expr.type).find_field(e.name).type
       when Ast::MethodCall
         type_expr!(e.expr, env)
         method = fclass(e.expr.type).find_method(e.name)

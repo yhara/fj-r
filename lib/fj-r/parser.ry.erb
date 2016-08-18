@@ -47,7 +47,7 @@ rule
 
     ctor_def :
       TYPE_NAME '(' opt_params ')' '{'
-        'super' '(' opt_params ')' ';'
+        'super' '(' opt_args ')' ';'
         opt_field_assigns
       '}'
       { Ast::CtorDef.new(val[0], val[2], val[6], val[9]) }

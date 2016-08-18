@@ -3,7 +3,8 @@ require 'spec_helper'
 describe FjR::TypeChecker do
   # TODO: instance variable name must not be the same as superclass's
   # TODO: type of this
-  # TODO: accessing inherited field
+  # TODO: check arity/argtype of super()
+  # TODO: pass instance of a subclass
 
   context "class definition" do
     it "cyclic inheritance" do
@@ -42,7 +43,7 @@ describe FjR::TypeChecker do
           }
           new A();
         EOD
-      }.to raise_error(FjR::Program::ArityError)
+      }.to raise_error(TC::ArityError)
     end
   end
 
@@ -125,9 +126,21 @@ describe FjR::TypeChecker do
     end
   end
 
-  context "variable reference"
+  context "field reference" do
+    it "may refer a field defined in the superclass" do
+      result_type = TC.check <<-EOD
+        class A extends Object {
+          Object obj;
+          A(Object obj_){ super(); this.obj = obj_; }
+        }
+        class B extends A { B(Object o){ super(o); } }
+        new B(new Object()).obj;
+      EOD
+      expect(result_type).to eq("Object")
+    end
+  end
 
-  context "field reference"
+  context "variable reference"
 
   context "casting"
 

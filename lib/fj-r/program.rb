@@ -13,8 +13,9 @@ module FjR
       raise TypeError unless ast.is_a?(Ast::Program)
 
       obj_ctor = FCtor.new("Object", [], [], [])
+      obj_class = FClass.new("Object", :noparent, obj_ctor, {}, {})
       @fclasses = {
-        "Object" => FClass.new("Object", :noparent, obj_ctor, {}, {})
+        "Object" => obj_class
       }
 
       ast.class_defs.each do |x|
@@ -61,9 +62,6 @@ module FjR
 
       if ctor.nil?
         raise SyntaxError, format("missing ctor of class %s", class_def.name)
-      elsif ctor.arity != fields.length
-        raise ArityError, format("ctor of class %s must receive %d argument(s)",
-                                 class_def.name, fields.length)
       end
 
       return FClass.new(class_def.name, class_def.parent_name,
@@ -112,12 +110,24 @@ module FjR
         raise "ctor is nil" if @ctor.nil?
       end
 
-      def field(name)
+      def find_field(name, start = @name)
         if (f = @ffields[name])
           return f
         else
-          raise NameError, format("unknown field %s of class %s",
-                                  name, @name)
+          if @parent == :noparent
+            raise NameError, format("unknown field %s of class %s",
+                                    name, start)
+          else
+            return @parent.find_field(name, start)
+          end
+        end
+      end
+
+      def n_fields
+        if @parent == :noparent
+          @ffields.length
+        else
+          @parent.n_fields + @ffields.length
         end
       end
 
