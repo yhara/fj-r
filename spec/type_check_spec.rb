@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe FjR::TypeChecker do
-  # TODO: instance variable name must not be the same as superclass's
   # TODO: type of this
   # TODO: check arity/argtype of super()
 
@@ -30,6 +29,20 @@ describe FjR::TypeChecker do
     #    EOD
     #  }.to raise_error(TODO)
     #end
+
+    it "must check name collision" do
+      expect {
+        TC.check <<-EOD
+          class A extends Object {
+            Object f; A(Object o){ super(); this.f = o; }
+          }
+          class B extends A {
+            Object f; B(Object o, Object oo){ super(o); this.f = oo; }
+          }
+          new A(new Object());
+        EOD
+      }.to raise_error(TC::NameCollision)
+    end
   end
 
   context "ctor definition" do

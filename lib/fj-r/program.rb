@@ -110,11 +110,12 @@ module FjR
         raise "ctor is nil" if @ctor.nil?
       end
 
-      def find_field(name, start = @name)
+      def find_field(name, start = @name, noraise: false)
         if (f = @ffields[name])
           return f
         else
           if @parent == :noparent
+            return nil if noraise
             raise NameError, format("unknown field %s of class %s",
                                     name, start)
           else

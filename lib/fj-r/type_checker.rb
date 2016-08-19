@@ -8,6 +8,7 @@ module FjR
     class NameError < Error; end
     class ReturnTypeError < Error; end
     class CyclicInheritance < Error; end
+    class NameCollision < Error; end
 
     # For test
     def self.check(str)
@@ -76,6 +77,15 @@ module FjR
         raise ArityError, format(
           "ctor of class %s must receive %d arg(s) but receives %d",
           fclass.name, fclass.n_fields, fclass.ctor.arity)
+      end
+
+      # field
+      fclass.ffields.each do |_, field|
+        if fclass.parent.find_field(field.name, noraise: true)
+          raise NameCollision, format(
+            "field %s of class %s is already defined in ancestor",
+            field.name, fclass.name) 
+        end
       end
 
       # methods

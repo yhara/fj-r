@@ -4,17 +4,17 @@
     name.split('_').map(&:capitalize).join
   end
 
-  def repeat1(name)
+  def repeat1(name, sep: nil)
     <<-EOD
     #{name}s : 
         #{name}
         { [val[0]] }
-      | #{name}s #{name}
+      | #{name}s #{sep} #{name}
         { val[0].push(val[1]) }
     EOD
   end
 
-  def repeat0(name)
+  def repeat0(name, sep: nil)
     <<-EOD
     opt_#{name}s :
         /* NONE */ 
@@ -22,7 +22,7 @@
       | #{name}s
       { val[0] }
 
-    #{repeat1(name)}
+    #{repeat1(name, sep: sep)}
     EOD
   end
 %>
@@ -72,7 +72,7 @@ rule
     param : 
       TYPE_NAME IDENT
       { Ast::Param.new(val[0], val[1]) }
-    <%= repeat0 'param' %>
+    <%= repeat0 'param', sep: "','" %>
 
     expression :
         varref
@@ -99,7 +99,7 @@ rule
       { Ast::NewObj.new(val[1], val[3]) }
 
     arg : expression
-    <%= repeat0 'arg' %>
+    <%= repeat0 'arg', sep: "','" %>
 
     opt_semicolon :
         /* none */
