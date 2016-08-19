@@ -173,7 +173,21 @@ describe FjR::TypeChecker do
     end
   end
 
-  context "variable reference"
+  context "variable reference" do
+    it "should be typed as its type" do
+      TC.check <<-EOD
+        class A extends Object {
+          A(){ super(); }
+          Object foo(Object o){ return o; }
+        }
+        class B extends Object {
+          B(){ super(); }
+          Object bar(Object o){ return new A().foo(o); }
+        }
+        new B().bar(new Object());
+      EOD
+    end
+  end
 
   context "casting"
 
