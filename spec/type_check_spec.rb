@@ -124,6 +124,30 @@ describe FjR::TypeChecker do
       EOD
       expect(result_type).to eq("Object")
     end
+
+    it "should check arity" do
+      expect {
+        TC.check <<-EOD
+          class A extends Object {
+            A(){ super(); }
+            Object foo(Object x){ return x; }
+          }
+          new A().foo();
+        EOD
+      }.to raise_error(TC::ArityError)
+    end
+
+    it "should check param type" do
+      expect {
+        TC.check <<-EOD
+          class A extends Object {
+            A(){ super(); }
+            A foo(A x){ return x; }
+          }
+          new A().foo(new Object());
+        EOD
+      }.to raise_error(TC::ArgTypeError)
+    end
   end
 
   context "field reference" do
