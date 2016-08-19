@@ -144,6 +144,16 @@ module FjR
           end
         end
       end
+
+      def descendant_of?(type_name)
+        if @parent == :noparent
+          return false
+        elsif @parent.name == type_name
+          return true
+        else
+          return @parent.descendant_of?(type_name)
+        end
+      end
     end
 
     class FField

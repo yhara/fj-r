@@ -4,7 +4,6 @@ describe FjR::TypeChecker do
   # TODO: instance variable name must not be the same as superclass's
   # TODO: type of this
   # TODO: check arity/argtype of super()
-  # TODO: pass instance of a subclass
 
   context "class definition" do
     it "cyclic inheritance" do
@@ -147,6 +146,16 @@ describe FjR::TypeChecker do
           new A().foo(new Object());
         EOD
       }.to raise_error(TC::ArgTypeError)
+    end
+
+    it "may pass an instance of a subclass" do
+      TC.check <<-EOD
+        class A extends Object {
+          A(){ super(); }
+          Object foo(Object x){ return x; }
+        }
+        new A().foo(new A());
+      EOD
     end
   end
 

@@ -109,13 +109,9 @@ module FjR
           raise ArityError, format("%p takes %d arguments but gave %d",
                                    method, method.arity, e.args.length)
         end
-        arg_types = e.args.map{|arg|
-          type_expr!(arg, env)
-          arg.type
-        }
         method.params.zip(e.args) do |param, arg_expr|
           type_expr!(arg_expr, env)
-          if param.type_name != arg_expr.type
+          if !subtype?(arg_expr.type, param.type_name)
             raise ArgTypeError, format("%s expected but got %s (%p)",
                                        param.type_name, arg_expr.type, arg_expr)
           end
@@ -130,7 +126,7 @@ module FjR
         end
         ctor.params.zip(e.args) do |param, arg_expr|
           type_expr!(arg_expr, env)
-          if param.type_name != arg_expr.type
+          if !subtype?(arg_expr.type, param.type_name)
             raise ArgTypeError, format("%s expected but got %s (%p)",
                                        param.type_name, arg_expr.type, arg_expr)
           end
@@ -145,6 +141,13 @@ module FjR
       else
         raise NameError, format("unknown class %s", name)
       end
+    end
+
+    # Return true when t1 <: t2
+    def subtype?(t1, t2)
+      return true if t1 == t2
+      fclass(t2) # Check existance of class t2
+      return fclass(t1).descendant_of?(t2)
     end
   end
 end
